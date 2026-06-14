@@ -1,0 +1,12 @@
+{
+  "name": "aman-cicd-app",
+  "version": "1.0.0",
+  "description": "Aman Khan CI/CD pipeline demo - DevOps Lecture 11 (Jenkins)",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "node test.js"
+  },
+  "author": "Aman Khan Swati",
+  "license": "MIT"
+}
