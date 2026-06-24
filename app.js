@@ -9,7 +9,7 @@ const server = http.createServer((req, res) => {
     return;
   }
   res.writeHead(200, { 'Content-Type': 'text/plain' });
-  res.end('Aman Khan - CI/CD Pipeline is up and running. Build healthy!\n');
+  res.end('Aman Khan - CI/CD Pipeline is up and running. Build healthy! (v2)\n');
 });
 
 server.listen(PORT, () => {
