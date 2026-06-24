@@ -9,9 +9,9 @@ pipeline {
     environment {
         APP_NAME   = 'aman-cicd-app'
         IMAGE_NAME = 'aman-cicd-app'
-        // 'dockerhub' = Username/Password credential added in Jenkins.
+        // 'dockerhub-aman' = Username/Password credential added in Jenkins.
         // Exposes DOCKERHUB_USR and DOCKERHUB_PSW to the pipeline.
-        DOCKERHUB  = credentials('dockerhub')
+        DOCKERHUB  = credentials('dockerhub-aman')
     }
 
     stages {
