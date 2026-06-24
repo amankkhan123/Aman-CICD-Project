@@ -1,9 +1,17 @@
 pipeline {
     agent any
 
+    // Lecture 12: build is kicked off automatically by a GitHub webhook on push.
+    triggers {
+        githubPush()
+    }
+
     environment {
-        APP_NAME  = 'aman-cicd-app'
-        IMAGE_TAG = 'aman-cicd-app:latest'
+        APP_NAME   = 'aman-cicd-app'
+        IMAGE_NAME = 'aman-cicd-app'
+        // 'dockerhub' = Username/Password credential added in Jenkins.
+        // Exposes DOCKERHUB_USR and DOCKERHUB_PSW to the pipeline.
+        DOCKERHUB  = credentials('dockerhub')
     }
 
     stages {
@@ -27,16 +35,24 @@ pipeline {
                 sh 'npm test'
             }
         }
-        stage('Build') {
+        stage('Docker Build') {
             steps {
-                echo "Building Docker image ${env.IMAGE_TAG}..."
-                sh 'docker build -t ${IMAGE_TAG} .'
+                echo "Building image ${DOCKERHUB_USR}/${IMAGE_NAME}..."
+                sh 'docker build -t $DOCKERHUB_USR/$IMAGE_NAME:$BUILD_NUMBER -t $DOCKERHUB_USR/$IMAGE_NAME:latest .'
+            }
+        }
+        stage('Docker Push') {
+            steps {
+                echo 'Logging in and pushing image to Docker Hub...'
+                sh 'echo "$DOCKERHUB_PSW" | docker login -u "$DOCKERHUB_USR" --password-stdin'
+                sh 'docker push $DOCKERHUB_USR/$IMAGE_NAME:$BUILD_NUMBER'
+                sh 'docker push $DOCKERHUB_USR/$IMAGE_NAME:latest'
             }
         }
         stage('Deploy') {
             steps {
                 echo "Deploying ${env.APP_NAME}..."
-                sh 'docker images | grep aman-cicd-app || true'
+                sh 'docker images | grep $IMAGE_NAME || true'
                 echo 'Deployment step complete.'
             }
         }
@@ -48,8 +64,11 @@ pipeline {
     }
 
     post {
+        always {
+            sh 'docker logout || true'
+        }
         success {
-            echo "SUCCESS: ${env.APP_NAME} pipeline completed all stages."
+            echo "SUCCESS: ${env.APP_NAME} image pushed to Docker Hub as ${DOCKERHUB_USR}/${IMAGE_NAME}."
         }
         failure {
             echo "FAILURE: ${env.APP_NAME} pipeline failed - check the logs above."
